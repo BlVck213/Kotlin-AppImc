@@ -11,4 +11,5 @@ data class Usuario(
     var dataNascimento:LocalDate,
     var profissao:String,
     var sexo:Char,
+    var fotoPerfil: String
 )

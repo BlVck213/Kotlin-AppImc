@@ -3,17 +3,23 @@ package com.example.appimc.ui
 import android.app.DatePickerDialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.*
+import androidx.core.graphics.drawable.toBitmap
 import com.example.appimc.R
 import com.example.appimc.model.Usuario
+import com.example.appimc.utils.convertBitmapToBase64
 import com.example.appimc.utils.convertStringToLocalDate
 import java.time.LocalDate
 import java.util.*
+
+const val CODE_IMAGE = 120
 
 class NovoUsuarioActivity : AppCompatActivity() {
 
@@ -29,12 +35,13 @@ class NovoUsuarioActivity : AppCompatActivity() {
     lateinit var radioSexo: RadioGroup
     lateinit var radioButtonFeminino: RadioButton
     lateinit var radioButtonMasculino: RadioButton
+    lateinit var imgTrocarFoto: ImageView
+    lateinit var tvTrocarFoto: TextView
+    var imageBitmap: Bitmap? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_novo_usuario)
-
-        supportActionBar!!.title = "PERFIL"
 
         textTrocarFoto = findViewById<TextView>(R.id.text_view_trocar_foto)
 
@@ -44,10 +51,21 @@ class NovoUsuarioActivity : AppCompatActivity() {
         editProfissao = findViewById<EditText>(R.id.edit_text_profissao)
         editAltura = findViewById<EditText>(R.id.edit_text_altura)
         editDataNascimento = findViewById<EditText>(R.id.edit_text_data_nascimento)
-
         radioSexo = findViewById<RadioGroup>(R.id.radio_group_sexo)
         radioButtonFeminino = findViewById<RadioButton>(R.id.radio_button_feminino)
         radioButtonMasculino = findViewById<RadioButton>(R.id.radio_button_masculino)
+        imgTrocarFoto = findViewById<ImageView>(R.id.imgTrocarFoto)
+        tvTrocarFoto = findViewById<TextView>(R.id.text_view_trocar_foto)
+        imageBitmap = resources.getDrawable(R.drawable.foto_perfil).toBitmap()
+
+
+        supportActionBar!!.title = "Perfil"
+        supportActionBar!!.subtitle = "Crie seu Perfil"
+
+        tvTrocarFoto.setOnClickListener{
+            abrirGaleria()
+        }
+
 
 
         // criando o Calendário
@@ -90,6 +108,39 @@ class NovoUsuarioActivity : AppCompatActivity() {
 
     }
 
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, imagem: Intent?) {
+        super.onActivityResult(requestCode, resultCode, imagem)
+
+        Log.i("xpto", resultCode.toString())
+
+        if(requestCode == CODE_IMAGE && resultCode == -1){
+            val fluxoImagem = contentResolver.openInputStream(imagem!!.data!!)
+
+            imageBitmap = BitmapFactory.decodeStream(fluxoImagem)
+
+            imgTrocarFoto.setImageBitmap((imageBitmap))
+
+
+        }
+
+    }
+
+
+
+
+    private fun abrirGaleria() {
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "image/*"
+
+        startActivityForResult(
+                Intent.createChooser(intent,
+                        "Escolha uma foto"),
+                CODE_IMAGE
+        )
+    }
+
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_perfil, menu)
         return true
@@ -118,6 +169,7 @@ class NovoUsuarioActivity : AppCompatActivity() {
                     } else{
                         'M'
                     },
+                    convertBitmapToBase64(imageBitmap!!)
             )
 
             val dados = getSharedPreferences("usuario", Context.MODE_PRIVATE)
@@ -131,6 +183,7 @@ class NovoUsuarioActivity : AppCompatActivity() {
             editor.putString("dataNascimento", usuario.dataNascimento.toString())
             editor.putString("profissao", usuario.profissao)
             editor.putString("sexo", usuario.sexo.toString())
+            editor.putString("fotoPerfil", usuario.fotoPerfil)
             editor.apply()
 
 

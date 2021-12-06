@@ -15,10 +15,11 @@
         android:layout_height="120dp"
         app:cardCornerRadius="60dp">
         <ImageView
+            android:id="@+id/imgTrocarFoto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/foto_perfil"
-            android:scaleType="centerCrop"/>
+            android:scaleType="centerCrop" />
     </androidx.cardview.widget.CardView>
 
 
